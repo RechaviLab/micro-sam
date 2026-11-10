@@ -4,7 +4,7 @@ from scipy.spatial.distance import cdist
 from skimage.morphology import skeletonize
 import imageio.v3 as imageio
 import matplotlib
-matplotlib.use('TkAgg')  # Use TkAgg backend for interactive plotting
+matplotlib.use('Agg')  # non-interactive backend: safe to use from the GUI's worker thread
 import matplotlib.pyplot as plt
 
 
@@ -780,7 +780,7 @@ def qc_flags(row, iou_min=0.9) -> str:
 
 
 def run_batch(input_path, params: Params = Params(), out_dir="wormsizer_out", recursive=False,
-              plots=True, debug_n=0, show=False, iou_min=0.9):
+              plots=True, debug_n=0, show=False, iou_min=0.9, progress_cb=None):
     """
     Measure every TIFF mask in a folder (each file = ONE worm).
 
@@ -806,6 +806,8 @@ def run_batch(input_path, params: Params = Params(), out_dir="wormsizer_out", re
     rows, failed, n_debug = [], [], 0
     t0 = time.time()
     for k, f in enumerate(files, 1):
+        if progress_cb:
+            progress_cb(k - 1, len(files), f.name)   # may raise to abort (GUI cancel)
         name = f.stem
         tag = f"[{k}/{len(files)}] {f.name}"
         try:
@@ -833,6 +835,8 @@ def run_batch(input_path, params: Params = Params(), out_dir="wormsizer_out", re
         except Exception as e:
             print(f"    (plotting failed for {f.name}: {e!r})")
 
+    if progress_cb:
+        progress_cb(len(files), len(files), "")
     df = pd.DataFrame(rows)
     if len(df):
         first = ["image", "file", "length_um", "mid_width_um", "mean_width_um", "volume_pl",
