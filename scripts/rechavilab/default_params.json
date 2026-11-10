@@ -1,0 +1,15 @@
+{
+  "segmentation": {
+    "model_type": "vit_b_lm",
+    "segmentation_mode": "apg",
+    "device": "cpu"
+  },
+  "wormsizer": {
+    "um_per_px": 2.0,
+    "interval_px": 10.0,
+    "min_area_px": 0,
+    "max_area_px": null,
+    "close_radius": 0,
+    "smooth_sigma_px": 3.0
+  }
+}
